@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}About - Remote Sensing{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="display-5 fw-bold mb-4">About Remote Sensing</h1>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Our Mission</h5>
+                    <p class="card-text">
+                        We provide a comprehensive platform for remote sensing data analysis, 
+                        enabling researchers and scientists to access, process, and share 
+                        satellite imagery and geospatial data.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Features</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-check-circle text-success"></i> Multi-source satellite data access</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Advanced data processing tools</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Collaborative research environment</li>
+                        <li><i class="bi bi-check-circle text-success"></i> ORCID integration for researcher identification</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Secure internal workspace</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">ORCID Integration</h5>
+                    <p class="card-text">
+                        We use ORCID (Open Researcher and Contributor ID) for authentication. 
+                        ORCID provides a persistent digital identifier that distinguishes you 
+                        from every other researcher.
+                    </p>
+                    <a href="https://orcid.org" target="_blank" class="btn btn-outline-secondary">
+                        <i class="bi bi-box-arrow-up-right"></i> Learn more about ORCID
+                    </a>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{{ path('app_public_index') }}" class="btn btn-primary">
+                    <i class="bi bi-arrow-left"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Home - Remote Sensing{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold">Welcome to Remote Sensing</h1>
+            <p class="lead text-muted">
+                A powerful platform for remote sensing data analysis and visualization.
+                Access advanced tools and collaborate with researchers worldwide.
+            </p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <a href="{{ path('app_public_about') }}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-info-circle"></i> Learn More
+                </a>
+                {% if not app.user %}
+                <a href="{{ path('app_login') }}" class="btn orcid-btn btn-lg">
+                    <i class="bi bi-box-arrow-in-right"></i> Login with ORCID
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-6 text-center">
+            <img src="https://via.placeholder.com/500x350?text=Remote+Sensing" alt="Remote Sensing" class="img-fluid rounded shadow">
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-satellite display-4 text-primary"></i>
+                    <h5 class="card-title mt-3">Satellite Data</h5>
+                    <p class="card-text">Access and analyze satellite imagery from multiple sources.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-graph-up display-4 text-success"></i>
+                    <h5 class="card-title mt-3">Data Analysis</h5>
+                    <p class="card-text">Powerful tools for processing and analyzing remote sensing data.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-people display-4 text-info"></i>
+                    <h5 class="card-title mt-3">Collaboration</h5>
+                    <p class="card-text">Share your work and collaborate with researchers worldwide.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

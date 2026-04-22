@@ -1,0 +1,49 @@
+security:
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: orcid
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        # Public section - no authentication required
+        public:
+            pattern: ^/public
+            security: false
+
+        # Internal section - requires authentication
+        internal:
+            pattern: ^/internal
+            lazy: true
+            provider: app_user_provider
+            custom_authenticators:
+                - App\Security\OrcidAuthenticator
+            logout:
+                path: app_logout
+                target: /
+
+        # Main firewall for OAuth callback
+        main:
+            pattern: ^/
+            lazy: true
+            provider: app_user_provider
+            custom_authenticators:
+                - App\Security\OrcidAuthenticator
+            logout:
+                path: app_logout
+                target: /
+
+    access_control:
+        # Public routes are accessible to everyone
+        - { path: ^/public, roles: PUBLIC_ACCESS }
+        # Internal routes require authenticated user
+        - { path: ^/internal, roles: ROLE_USER }
+        # ORCID OAuth callback
+        - { path: ^/auth/orcid/callback, roles: PUBLIC_ACCESS }
