@@ -4,6 +4,15 @@
 
 {% block body %}
 <div class="container py-5">
+    {% if app.user %}
+    <div class="alert alert-success d-flex align-items-center" role="alert">
+        <i class="bi bi-person-check-fill me-2 fs-4"></i>
+        <div>
+            <strong>Welcome back, {{ app.user.name ?: app.user.userIdentifier }}!</strong>
+            You are logged in and can access the internal section.
+        </div>
+    </div>
+    {% endif %}
     <div class="row">
         <div class="col-lg-8 mx-auto">
             <h1 class="display-5 fw-bold mb-4">About Remote Sensing</h1>

@@ -1,122 +1,77 @@
-{% extends 'base.html.twig' %}
+{% extends 'internal/base.html.twig' %}
 
 {% block title %}Internal - Remote Sensing{% endblock %}
 
+{% block main_class %}container-fluid py-4{% endblock %}
+
 {% block body %}
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar p-3">
-            <div class="position-sticky">
-                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-3 text-muted">
-                    <span>Navigation</span>
-                </h6>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{{ path('app_internal_index') }}">
-                            <i class="bi bi-house"></i> Overview
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_internal_dashboard') }}">
-                            <i class="bi bi-speedometer2"></i> Dashboard
-                        </a>
-                    </li>
-                </ul>
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Internal Dashboard</h1>
+        
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> 
+            Welcome to the internal section! This area is only accessible to authenticated users.
+        </div>
 
-                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-3 text-muted">
-                    <span>Your Profile</span>
-                </h6>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <span class="nav-link text-muted">
-                            <i class="bi bi-person"></i> {{ app.user.name ?: 'User' }}
-                        </span>
-                    </li>
-                    <li class="nav-item">
-                        <span class="nav-link text-muted small">
-                            <i class="bi bi-github"></i> {{ app.user.githubId }}
-                        </span>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-
-        <!-- Main content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Internal Section</h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <a href="{{ path('app_logout') }}" class="btn btn-outline-danger">
-                        <i class="bi bi-box-arrow-right"></i> Logout
-                    </a>
-                </div>
-            </div>
-
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> 
-                Welcome to the internal section! This area is only accessible to authenticated users.
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-primary text-white">
-                            <i class="bi bi-person-check"></i> Authentication Status
-                        </div>
-                        <div class="card-body">
-                            <p><strong>GitHub ID:</strong> {{ app.user.githubId }}</p>
-                            <p><strong>Name:</strong> {{ app.user.name ?: 'Not provided' }}</p>
-                            <p><strong>Email:</strong> {{ app.user.email ?: 'Not provided' }}</p>
-                            <p><strong>Member since:</strong> {{ app.user.createdAt|date('Y-m-d H:i') }}</p>
-                        </div>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-person-check"></i> Authentication Status
                     </div>
-                </div>
-
-                <div class="col-md-6 mb-4">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-success text-white">
-                            <i class="bi bi-shield-check"></i> Security
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-2">You are securely logged in via GitHub OAuth.</p>
-                            <p class="mb-0 text-muted small">
-                                <i class="bi bi-lock"></i> This section requires authentication.
-                            </p>
-                        </div>
+                    <div class="card-body">
+                        <p><strong>GitHub ID:</strong> {{ app.user.githubId }}</p>
+                        <p><strong>Name:</strong> {{ app.user.name ?: 'Not provided' }}</p>
+                        <p><strong>Email:</strong> {{ app.user.email ?: 'Not provided' }}</p>
+                        <p><strong>Member since:</strong> {{ app.user.createdAt|date('Y-m-d H:i') }}</p>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header">
-                            <i class="bi bi-grid"></i> Quick Actions
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <a href="{{ path('app_internal_dashboard') }}" class="btn btn-outline-primary w-100">
-                                        <i class="bi bi-speedometer2"></i> Go to Dashboard
-                                    </a>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <a href="{{ path('app_public_index') }}" class="btn btn-outline-secondary w-100">
-                                        <i class="bi bi-globe"></i> Public Section
-                                    </a>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <a href="{{ path('app_logout') }}" class="btn btn-outline-danger w-100">
-                                        <i class="bi bi-box-arrow-right"></i> Logout
-                                    </a>
-                                </div>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <i class="bi bi-shield-check"></i> Security
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">You are securely logged in via GitHub OAuth.</p>
+                        <p class="mb-0 text-muted small">
+                            <i class="bi bi-lock"></i> This section requires authentication.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <i class="bi bi-grid"></i> Quick Actions
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <a href="{{ path('app_internal_dashboard') }}" class="btn btn-outline-primary w-100">
+                                    <i class="bi bi-speedometer2"></i> Analytics
+                                </a>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <a href="{{ path('app_public_index') }}" class="btn btn-outline-secondary w-100">
+                                    <i class="bi bi-globe"></i> Public Section
+                                </a>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <a href="{{ path('app_logout') }}" class="btn btn-outline-danger w-100">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
 </div>
 {% endblock %}

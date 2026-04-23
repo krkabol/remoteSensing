@@ -4,6 +4,15 @@
 
 {% block body %}
 <div class="container py-5">
+    {% if app.user %}
+    <div class="alert alert-success d-flex align-items-center" role="alert">
+        <i class="bi bi-person-check-fill me-2 fs-4"></i>
+        <div>
+            <strong>Welcome back, {{ app.user.name ?: app.user.userIdentifier }}!</strong>
+            You are logged in and can access the internal section.
+        </div>
+    </div>
+    {% endif %}
     <div class="row align-items-center">
         <div class="col-lg-6">
             <h1 class="display-4 fw-bold">Welcome to Remote Sensing</h1>
@@ -15,7 +24,11 @@
                 <a href="{{ path('app_public_about') }}" class="btn btn-primary btn-lg">
                     <i class="bi bi-info-circle"></i> Learn More
                 </a>
-                {% if not app.user %}
+                {% if app.user %}
+                <a href="{{ path('app_internal_index') }}" class="btn btn-success btn-lg">
+                    <i class="bi bi-speedometer2"></i> Go to Internal Section
+                </a>
+                {% else %}
                 <a href="{{ path('app_login') }}" class="btn btn-dark btn-lg">
                     <i class="bi bi-github"></i> Login with GitHub
                 </a>

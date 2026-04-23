@@ -13,22 +13,7 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        # Public section - no authentication required
-        public:
-            pattern: ^/public
-            security: false
-
-        # Internal section - requires authentication
-        internal:
-            pattern: ^/internal
-            lazy: true
-            provider: app_user_provider
-            context: main
-            logout:
-                path: app_logout
-                target: /
-
-        # Main firewall for OAuth callback
+        # Main firewall - handles all routes with OAuth
         main:
             pattern: ^/
             lazy: true
