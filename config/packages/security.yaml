@@ -13,13 +13,15 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        # Main firewall - handles all routes with OAuth
+        # Main firewall - handles all routes with OAuth, JWT and API Keys
         main:
             pattern: ^/
             lazy: true
             provider: app_user_provider
             custom_authenticators:
                 - App\Security\GithubAuthenticator
+                - App\Security\JwtAuthenticator
+                - App\Security\ApiKeyAuthenticator
             logout:
                 path: app_logout
                 target: /
@@ -29,5 +31,10 @@ security:
         - { path: ^/public, roles: PUBLIC_ACCESS }
         # Internal routes require authenticated user
         - { path: ^/internal, roles: ROLE_USER }
+        # API documentation is public
+        - { path: ^/api/doc, roles: PUBLIC_ACCESS }
+        - { path: ^/api/doc.json, roles: PUBLIC_ACCESS }
+        # API routes require authenticated user
+        - { path: ^/api, roles: ROLE_USER }
         # GitHub OAuth callback
         - { path: ^/auth/github/callback, roles: PUBLIC_ACCESS }

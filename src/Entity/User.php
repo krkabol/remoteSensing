@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -40,9 +42,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $lastLoginAt = null;
 
+    /**
+     * @var Collection<int, ApiKey>
+     */
+    #[ORM\OneToMany(targetEntity: ApiKey::class, mappedBy: 'owner', orphanRemoval: true)]
+    private Collection $apiKeys;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->apiKeys = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -156,5 +165,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // OAuth users don't have a password
         return null;
+    }
+
+    /**
+     * @return Collection<int, ApiKey>
+     */
+    public function getApiKeys(): Collection
+    {
+        return $this->apiKeys;
+    }
+
+    public function addApiKey(ApiKey $apiKey): static
+    {
+        if (!$this->apiKeys->contains($apiKey)) {
+            $this->apiKeys->add($apiKey);
+            $apiKey->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeApiKey(ApiKey $apiKey): static
+    {
+        if ($this->apiKeys->removeElement($apiKey)) {
+            // set the owning side to null (unless already changed)
+            if ($apiKey->getOwner() === $this) {
+                $apiKey->setOwner(null);
+            }
+        }
+
+        return $this;
     }
 }

@@ -1,0 +1,121 @@
+{% extends 'internal/base.html.twig' %}
+
+{% block title %}API Token - Internal{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2"><i class="bi bi-key"></i> API Token</h1>
+                <a href="{{ path('app_internal_index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i>
+                <strong>JWT Token for API Access</strong>
+                <p class="mb-0 mt-2">
+                    Use this token to authenticate API requests. Include it in the 
+                    <code>Authorization: Bearer <token></code> header.
+                </p>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-shield-lock"></i> Your API Token</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Token:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control font-monospace" id="apiToken" value="{{ token }}" readonly>
+                            <button class="btn btn-outline-primary" type="button" onclick="copyToken()">
+                                <i class="bi bi-clipboard"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1 text-muted">Token Type:</p>
+                            <p><strong>Bearer (JWT)</strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1 text-muted">Expires In:</p>
+                            <p><strong>{{ expires_in }} seconds ({{ (expires_in / 60)|round(0, 'floor') }} minutes)</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Important:</strong> This token will expire after {{ (expires_in / 60)|round(0, 'floor') }} minutes. 
+                        After expiration, you'll need to generate a new token.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-code-slash"></i> Usage Examples</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">cURL Example:</h6>
+                    <pre class="bg-light p-3 rounded"><code>curl -X GET http://your-app/api/v1/user/me \
+  -H "Authorization: Bearer {{ token }}"</code></pre>
+
+                    <h6 class="card-subtitle mb-2 text-muted mt-4">JavaScript Fetch Example:</h6>
+                    <pre class="bg-light p-3 rounded"><code>fetch('http://your-app/api/v1/user/me', {
+  method: 'GET',
+  headers: {
+    'Authorization': 'Bearer {{ token }}',
+    'Content-Type': 'application/json'
+  }
+})
+.then(response => response.json())
+.then(data => console.log(data));</code></pre>
+
+                    <h6 class="card-subtitle mb-2 text-muted mt-4">Get New Token (API):</h6>
+                    <pre class="bg-light p-3 rounded"><code>curl -X POST http://your-app/api/v1/token \
+  -H "Cookie: PHPSESSID=your_session_id"</code></pre>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-arrow-repeat"></i> Refresh Token</h5>
+                </div>
+                <div class="card-body">
+                    <p>Need a fresh token? Click the button below to generate a new one.</p>
+                    <form method="post" action="{{ path('app_internal_api_token') }}">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> Generate New Token
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToken() {
+    const tokenInput = document.getElementById('apiToken');
+    tokenInput.select();
+    tokenInput.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(tokenInput.value).then(() => {
+        const btn = document.querySelector('button[onclick="copyToken()"]');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+        btn.classList.remove('btn-outline-primary');
+        btn.classList.add('btn-success');
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-primary');
+        }, 2000);
+    });
+}
+</script>
+{% endblock %}

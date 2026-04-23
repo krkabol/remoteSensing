@@ -1,0 +1,247 @@
+{% extends 'internal/base.html.twig' %}
+
+{% block title %}API Keys - Internal{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2"><i class="bi bi-key-fill"></i> API Keys</h1>
+                <a href="{{ path('app_internal_index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i>
+                <strong>API Keys for External Devices</strong>
+                <p class="mb-0 mt-2">
+                    Create long-lived API keys for your external devices. These keys don't expire (unless you set an expiration date)
+                    and can be used to authenticate API requests from sensors, IoT devices, or other external systems.
+                </p>
+            </div>
+
+            <!-- Create New Key Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Create New API Key</h5>
+                </div>
+                <div class="card-body">
+                    <form id="createKeyForm" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="keyName" class="form-label">Key Name *</label>
+                            <input type="text" class="form-control" id="keyName" placeholder="e.g., Device Sensor #1" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="expiresInDays" class="form-label">Expires In (days)</label>
+                            <input type="number" class="form-control" id="expiresInDays" placeholder="Leave empty for no expiration" min="1">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-plus-circle"></i> Create
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- New Key Display Modal (shown after creation) -->
+            <div id="newKeyAlert" class="alert alert-success d-none">
+                <h5 class="alert-heading"><i class="bi bi-check-circle"></i> API Key Created!</h5>
+                <p class="mb-2"><strong>Important: Copy this key now. It will never be shown again!</strong></p>
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control font-monospace" id="newKeyValue" readonly>
+                    <button class="btn btn-outline-success" type="button" onclick="copyNewKey()">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                </div>
+                <p class="mb-0 text-muted">Store this key securely on your device. Once you close this alert, you won't be able to see it again.</p>
+            </div>
+
+            <!-- API Keys List -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> Your API Keys</h5>
+                </div>
+                <div class="card-body">
+                    {% if keys is empty %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-key display-4 text-muted"></i>
+                            <p class="text-muted mt-3">No API keys created yet.</p>
+                            <p class="small text-muted">Create your first API key above to get started.</p>
+                        </div>
+                    {% else %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Prefix</th>
+                                        <th>Created</th>
+                                        <th>Expires</th>
+                                        <th>Last Used</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for key in keys %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ key.name }}</strong>
+                                        </td>
+                                        <td>
+                                            <code class="text-muted">{{ 'sk_live_'|slice(0, 8) }}...</code>
+                                        </td>
+                                        <td>{{ key.createdAt|date('Y-m-d H:i') }}</td>
+                                        <td>
+                                            {% if key.expiresAt %}
+                                                {% if key.expired %}
+                                                    <span class="text-danger"><i class="bi bi-x-circle"></i> Expired</span>
+                                                {% else %}
+                                                    {{ key.expiresAt|date('Y-m-d') }}
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-success"><i class="bi bi-infinity"></i> Never</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if key.lastUsedAt %}
+                                                {{ key.lastUsedAt|date('Y-m-d H:i') }}
+                                            {% else %}
+                                                <span class="text-muted">Never</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if key.active and not key.expired %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if key.active %}
+                                                <button class="btn btn-sm btn-outline-danger" onclick="revokeKey({{ key.id }}, '{{ key.name }}')">
+                                                    <i class="bi bi-trash"></i> Revoke
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted">Revoked</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Usage Examples -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-code-slash"></i> Usage Examples</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">cURL Example:</h6>
+                    <pre class="bg-light p-3 rounded"><code>curl -X POST http://your-app/api/v1/data \
+  -H "Authorization: ApiKey sk_live_abc123..." \
+  -H "Content-Type: application/json" \
+  -d '{"sensor": "temp", "value": 25.5}'</code></pre>
+
+                    <h6 class="card-subtitle mb-2 text-muted mt-4">Python Example:</h6>
+                    <pre class="bg-light p-3 rounded"><code>import requests
+
+API_KEY = "sk_live_abc123..."
+headers = {"Authorization": f"ApiKey {API_KEY}"}
+
+response = requests.post(
+    "http://your-app/api/v1/data",
+    headers=headers,
+    json={"sensor": "temp", "value": 25.5}
+)</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentNewKey = '';
+
+document.getElementById('createKeyForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('keyName').value;
+    const expiresInDays = document.getElementById('expiresInDays').value;
+    
+    const payload = { name };
+    if (expiresInDays) {
+        payload.expires_in_days = parseInt(expiresInDays);
+    }
+    
+    try {
+        const response = await fetch('{{ path('app_api_v1_api_keys_create') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            currentNewKey = data.key;
+            document.getElementById('newKeyValue').value = data.key;
+            document.getElementById('newKeyAlert').classList.remove('d-none');
+            document.getElementById('createKeyForm').reset();
+            
+            // Reload page after 5 seconds to show new key in list
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
+        } else {
+            const error = await response.json();
+            alert('Error: ' + (error.error || 'Failed to create key'));
+        }
+    } catch (err) {
+        alert('Error creating key: ' + err.message);
+    }
+});
+
+function copyNewKey() {
+    const keyInput = document.getElementById('newKeyValue');
+    keyInput.select();
+    keyInput.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(keyInput.value).then(() => {
+        const btn = document.querySelector('button[onclick="copyNewKey()"]');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+        }, 2000);
+    });
+}
+
+async function revokeKey(id, name) {
+    if (!confirm(`Are you sure you want to revoke the API key "${name}"? This action cannot be undone.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/v1/api-keys/${id}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            alert('Failed to revoke key');
+        }
+    } catch (err) {
+        alert('Error revoking key: ' + err.message);
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,179 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Remote Sensing API
+            description: |
+                REST API for Remote Sensing application with user management and multiple authentication methods.
+                
+                ## Authentication Methods
+                
+                The API supports three authentication methods:
+                
+                ### 1. Session Authentication (for Swagger UI)
+                
+                When accessing the API through Swagger UI while logged in to the application, 
+                your session cookie is automatically used for authentication.
+                
+                **Use case:** Web browser access, testing in Swagger UI
+                **Expiration:** Session lifetime
+                
+                ### 2. JWT Bearer Token (Short-term API Access)
+                
+                JSON Web Tokens for API authentication with configurable expiration (default: 1 hour).
+                
+                **Use case:** Temporary API access, mobile apps, short-lived integrations
+                **Expiration:** 1 hour (configurable via JWT_TOKEN_LIFETIME)
+                
+                **Getting a JWT Token:**
+                
+                1. Via API: `POST /api/v1/token` (requires session auth)
+                2. Via UI: Log in and navigate to **API > JWT Token**
+                
+                **Using JWT Token:**
+                ```
+                Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+                ```
+                
+                ### 3. API Keys (Long-lived Device Authentication)
+                
+                Static API keys for external devices, sensors, or IoT devices.
+                
+                **Use case:** External devices running in the wild, sensors, IoT devices
+                **Expiration:** Never (optional expiration can be set)
+                **Key Format:** `sk_live_` + 64 hexadecimal characters
+                
+                **Getting an API Key:**
+                
+                1. Via UI: Log in and navigate to **API > API Keys (Devices)**
+                2. Via API: `POST /api/v1/api-keys` (requires session or JWT auth)
+                
+                **Using API Key:**
+                ```
+                Authorization: ApiKey sk_live_abc123...
+                ```
+                
+                ## Quick Reference
+                
+                | Method | Header Format | Expiration | Use Case |
+                |--------|---------------|------------|----------|
+                | Session | Cookie (auto) | Session | Browser |
+                | JWT | `Bearer <token>` | 1 hour | Short-term API |
+                | API Key | `ApiKey sk_live_...` | Never | Devices/IoT |
+            version: 1.0.0
+        tags:
+            - name: Authentication
+              description: JWT token and API key management endpoints
+            - name: Users
+              description: User management endpoints
+            - name: API Keys
+              description: Long-lived API key management for devices
+        components:
+            schemas:
+                User:
+                    type: object
+                    properties:
+                        id:
+                            type: integer
+                            description: User ID
+                        githubId:
+                            type: string
+                            description: GitHub user ID
+                        name:
+                            type: string
+                            nullable: true
+                            description: Full name
+                        email:
+                            type: string
+                            nullable: true
+                            description: Email address
+                        givenNames:
+                            type: string
+                            nullable: true
+                            description: Given names
+                        familyName:
+                            type: string
+                            nullable: true
+                            description: Family name
+                        createdAt:
+                            type: string
+                            format: date-time
+                            description: Account creation date
+                        lastLoginAt:
+                            type: string
+                            format: date-time
+                            nullable: true
+                            description: Last login date
+                Token:
+                    type: object
+                    properties:
+                        token:
+                            type: string
+                            description: JWT token
+                        expires_in:
+                            type: integer
+                            description: Token lifetime in seconds
+                        token_type:
+                            type: string
+                            example: Bearer
+                ApiKey:
+                    type: object
+                    properties:
+                        id:
+                            type: integer
+                            description: API Key ID
+                        name:
+                            type: string
+                            description: Key name (e.g., "Device Sensor #1")
+                        prefix:
+                            type: string
+                            example: sk_live_
+                        created_at:
+                            type: string
+                            format: date-time
+                            description: Key creation date
+                        expires_at:
+                            type: string
+                            format: date-time
+                            nullable: true
+                            description: Optional expiration date
+                        last_used_at:
+                            type: string
+                            format: date-time
+                            nullable: true
+                            description: Last usage timestamp
+                        is_active:
+                            type: boolean
+                            description: Whether the key is active
+            securitySchemes:
+                bearerAuth:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+                    description: |
+                        Enter your JWT token here.
+                        
+                        **How to get a JWT token:**
+                        1. POST /api/v1/token endpoint (requires session auth)
+                        2. UI: Internal Section > API > JWT Token
+                        
+                        **Token lifetime:** 1 hour (configurable)
+                apiKeyAuth:
+                    type: apiKey
+                    in: header
+                    name: Authorization
+                    description: |
+                        Enter your API key for long-lived device authentication.
+                        
+                        **Format:** "ApiKey sk_live_xxx"
+                        
+                        **How to get an API key:**
+                        1. UI: Internal Section > API > API Keys (Devices)
+                        2. POST /api/v1/api-keys endpoint
+                        
+                        **Key lifetime:** Never (unless expiration is set)
+        security:
+            - bearerAuth: []
+            - apiKeyAuth: []
+    areas:
+        path_patterns:
+            - ^/api(?!/doc$) # Accepts routes under /api, but not /api/doc
