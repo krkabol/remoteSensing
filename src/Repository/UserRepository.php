@@ -16,9 +16,9 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
-    public function findByOrcid(string $orcid): ?User
+    public function findByGithubId(string $githubId): ?User
     {
-        return $this->findOneBy(['orcid' => $orcid]);
+        return $this->findOneBy(['githubId' => $githubId]);
     }
 
     public function save(User $user, bool $flush = true): void

@@ -23,28 +23,27 @@ class SecurityController extends AbstractController
         ]);
     }
 
-    #[Route('/auth/orcid', name: 'app_auth_orcid')]
-    public function loginWithOrcid(UrlGeneratorInterface $urlGenerator): Response
+    #[Route('/auth/github', name: 'app_auth_github')]
+    public function loginWithGithub(UrlGeneratorInterface $urlGenerator): Response
     {
-        $orcidProvider = new GenericProvider([
-            'clientId' => $_ENV['ORCID_CLIENT_ID'],
-            'clientSecret' => $_ENV['ORCID_CLIENT_SECRET'],
-            'redirectUri' => $_ENV['ORCID_REDIRECT_URI'],
-            'urlAuthorize' => $_ENV['ORCID_AUTH_URL'],
-            'urlAccessToken' => $_ENV['ORCID_TOKEN_URL'],
-            'urlResourceOwnerDetails' => $_ENV['ORCID_API_URL'] . '/$/',
-            'scopes' => ['/authenticate', '/read-limited'],
+        $githubProvider = new GenericProvider([
+            'clientId' => $_ENV['GITHUB_CLIENT_ID'],
+            'clientSecret' => $_ENV['GITHUB_CLIENT_SECRET'],
+            'redirectUri' => $_ENV['GITHUB_REDIRECT_URI'],
+            'urlAuthorize' => 'https://github.com/login/oauth/authorize',
+            'urlAccessToken' => 'https://github.com/login/oauth/access_token',
+            'urlResourceOwnerDetails' => 'https://api.github.com/user',
         ]);
 
-        $authUrl = $orcidProvider->getAuthorizationUrl();
+        $authUrl = $githubProvider->getAuthorizationUrl();
 
         return $this->redirect($authUrl);
     }
 
-    #[Route('/auth/orcid/callback', name: 'app_auth_orcid_callback')]
-    public function orcidCallback(): Response
+    #[Route('/auth/github/callback', name: 'app_auth_github_callback')]
+    public function githubCallback(): Response
     {
-        // This route is handled by the OrcidAuthenticator
+        // This route is handled by the GithubAuthenticator
         // The authenticator will process the OAuth callback
         return new Response('Authentication in progress...', 202);
     }

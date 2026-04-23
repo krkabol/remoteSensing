@@ -1,3 +1,11 @@
+# Redirect root to public section
+app_redirect_to_public:
+    path: /
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController
+    defaults:
+        path: /public
+        permanent: false
+
 controllers:
     resource:
         path: ../src/Controller/

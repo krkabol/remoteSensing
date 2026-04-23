@@ -6,7 +6,7 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\User
-                property: orcid
+                property: githubId
 
     firewalls:
         dev:
@@ -23,8 +23,7 @@ security:
             pattern: ^/internal
             lazy: true
             provider: app_user_provider
-            custom_authenticators:
-                - App\Security\OrcidAuthenticator
+            context: main
             logout:
                 path: app_logout
                 target: /
@@ -35,7 +34,7 @@ security:
             lazy: true
             provider: app_user_provider
             custom_authenticators:
-                - App\Security\OrcidAuthenticator
+                - App\Security\GithubAuthenticator
             logout:
                 path: app_logout
                 target: /
@@ -45,5 +44,5 @@ security:
         - { path: ^/public, roles: PUBLIC_ACCESS }
         # Internal routes require authenticated user
         - { path: ^/internal, roles: ROLE_USER }
-        # ORCID OAuth callback
-        - { path: ^/auth/orcid/callback, roles: PUBLIC_ACCESS }
+        # GitHub OAuth callback
+        - { path: ^/auth/github/callback, roles: PUBLIC_ACCESS }

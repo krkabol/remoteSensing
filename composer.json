@@ -1,6 +1,6 @@
 {
-    "name": "symfony/orcid-app",
-    "description": "Symfony 8 application with ORCID OAuth authentication",
+    "name": "symfony/github-app",
+    "description": "Symfony 8 application with GitHub OAuth authentication",
     "type": "project",
     "license": "MIT",
     "minimum-stability": "stable",

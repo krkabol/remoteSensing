@@ -17,9 +17,9 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 
-class OrcidAuthenticator extends AbstractAuthenticator
+class GithubAuthenticator extends AbstractAuthenticator
 {
-    private GenericProvider $orcidProvider;
+    private GenericProvider $githubProvider;
     private UrlGeneratorInterface $urlGenerator;
     private EntityManagerInterface $entityManager;
     private UserRepository $userRepository;
@@ -33,21 +33,20 @@ class OrcidAuthenticator extends AbstractAuthenticator
         $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
 
-        $this->orcidProvider = new GenericProvider([
-            'clientId' => $_ENV['ORCID_CLIENT_ID'],
-            'clientSecret' => $_ENV['ORCID_CLIENT_SECRET'],
-            'redirectUri' => $_ENV['ORCID_REDIRECT_URI'],
-            'urlAuthorize' => $_ENV['ORCID_AUTH_URL'],
-            'urlAccessToken' => $_ENV['ORCID_TOKEN_URL'],
-            'urlResourceOwnerDetails' => $_ENV['ORCID_API_URL'] . '/$/',
-            'scopes' => ['/authenticate', '/read-limited'],
+        $this->githubProvider = new GenericProvider([
+            'clientId' => $_ENV['GITHUB_CLIENT_ID'],
+            'clientSecret' => $_ENV['GITHUB_CLIENT_SECRET'],
+            'redirectUri' => $_ENV['GITHUB_REDIRECT_URI'],
+            'urlAuthorize' => 'https://github.com/login/oauth/authorize',
+            'urlAccessToken' => 'https://github.com/login/oauth/access_token',
+            'urlResourceOwnerDetails' => 'https://api.github.com/user',
         ]);
     }
 
     public function supports(Request $request): ?bool
     {
-        // Support ORCID callback
-        return $request->attributes->get('_route') === 'app_auth_orcid_callback';
+        // Only support the GitHub callback route
+        return $request->attributes->get('_route') === 'app_auth_github_callback';
     }
 
     public function authenticate(Request $request): Passport
@@ -59,52 +58,35 @@ class OrcidAuthenticator extends AbstractAuthenticator
         }
 
         try {
-            $accessToken = $this->orcidProvider->getAccessToken('authorization_code', [
+            $accessToken = $this->githubProvider->getAccessToken('authorization_code', [
                 'code' => $code,
             ]);
 
-            $orcidUser = $this->orcidProvider->getResourceOwner($accessToken);
-            $orcidData = $orcidUser->toArray();
+            $githubUser = $this->githubProvider->getResourceOwner($accessToken);
+            $githubData = $githubUser->toArray();
 
-            // Extract ORCID ID
-            $orcidId = $orcidData['orcid-identifier']['path'] ?? null;
+            // Extract GitHub ID
+            $githubId = (string) ($githubData['id'] ?? null);
 
-            if (!$orcidId) {
-                throw new AuthenticationException('Could not retrieve ORCID ID');
+            if (!$githubId) {
+                throw new AuthenticationException('Could not retrieve GitHub ID');
             }
 
             // Find or create user
-            $user = $this->userRepository->findByOrcid($orcidId);
+            $user = $this->userRepository->findByGithubId($githubId);
 
             if (!$user) {
                 $user = new User();
-                $user->setOrcid($orcidId);
+                $user->setGithubId($githubId);
                 
                 // Extract name information
-                $person = $orcidData['person'] ?? [];
-                $name = $person['name'] ?? [];
-                
-                $givenNames = $name['given-names']['value'] ?? null;
-                $familyName = $name['family-name']['value'] ?? null;
-                
-                $user->setGivenNames($givenNames);
-                $user->setFamilyName($familyName);
-                $user->setName(
-                    trim(($givenNames ?? '') . ' ' . ($familyName ?? ''))
-                );
-
-                // Extract email if available
-                $emails = $person['emails'] ?? [];
-                $email = null;
-                foreach ($emails as $emailData) {
-                    if (($emailData['primary'] ?? false) || $email === null) {
-                        $email = $emailData['email'] ?? null;
-                    }
-                }
-                $user->setEmail($email);
+                $user->setName($githubData['name'] ?? null);
+                $user->setGivenNames($githubData['name'] ?? null);
+                $user->setFamilyName(null);
+                $user->setEmail($githubData['email'] ?? null);
 
                 // Store additional data
-                $user->setAdditionalData($orcidData);
+                $user->setAdditionalData($githubData);
 
                 $this->entityManager->persist($user);
             }
@@ -112,17 +94,17 @@ class OrcidAuthenticator extends AbstractAuthenticator
             $user->setLastLoginAt(new \DateTimeImmutable());
             $this->entityManager->flush();
 
-            return new SelfValidatingPassport(new UserBadge($orcidId, fn() => $user));
+            return new SelfValidatingPassport(new UserBadge($githubId, fn() => $user));
 
         } catch (\Exception $e) {
-            throw new AuthenticationException('ORCID authentication failed: ' . $e->getMessage(), 0, $e);
+            throw new AuthenticationException('GitHub authentication failed: ' . $e->getMessage(), 0, $e);
         }
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         // Redirect to internal section after successful login
-        return new RedirectResponse($this->urlGenerator->generate('app_internal'));
+        return new RedirectResponse($this->urlGenerator->generate('app_internal_index'));
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
@@ -134,8 +116,8 @@ class OrcidAuthenticator extends AbstractAuthenticator
 
     public function start(Request $request, ?AuthenticationException $authException = null): Response
     {
-        // Redirect to ORCID authorization URL
-        $authUrl = $this->orcidProvider->getAuthorizationUrl();
+        // Redirect to GitHub authorization URL
+        $authUrl = $this->githubProvider->getAuthorizationUrl();
         return new RedirectResponse($authUrl);
     }
 }

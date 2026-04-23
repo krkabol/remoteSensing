@@ -16,8 +16,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 19, unique: true)]
-    private ?string $orcid = null;
+    #[ORM\Column(length: 255, unique: true)]
+    private ?string $githubId = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $name = null;
@@ -50,14 +50,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id;
     }
 
-    public function getOrcid(): ?string
+    public function getGithubId(): ?string
     {
-        return $this->orcid;
+        return $this->githubId;
     }
 
-    public function setOrcid(string $orcid): static
+    public function setGithubId(string $githubId): static
     {
-        $this->orcid = $orcid;
+        $this->githubId = $githubId;
         return $this;
     }
 
@@ -149,7 +149,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
-        return $this->orcid ?? 'user';
+        return $this->githubId ?? 'user';
     }
 
     public function getPassword(): ?string

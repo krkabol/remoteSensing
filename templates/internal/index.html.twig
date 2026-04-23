@@ -35,7 +35,7 @@
                     </li>
                     <li class="nav-item">
                         <span class="nav-link text-muted small">
-                            <i class="bi bi-fingerprint"></i> {{ app.user.orcid }}
+                            <i class="bi bi-github"></i> {{ app.user.githubId }}
                         </span>
                     </li>
                 </ul>
@@ -65,7 +65,7 @@
                             <i class="bi bi-person-check"></i> Authentication Status
                         </div>
                         <div class="card-body">
-                            <p><strong>ORCID ID:</strong> {{ app.user.orcid }}</p>
+                            <p><strong>GitHub ID:</strong> {{ app.user.githubId }}</p>
                             <p><strong>Name:</strong> {{ app.user.name ?: 'Not provided' }}</p>
                             <p><strong>Email:</strong> {{ app.user.email ?: 'Not provided' }}</p>
                             <p><strong>Member since:</strong> {{ app.user.createdAt|date('Y-m-d H:i') }}</p>
@@ -79,7 +79,7 @@
                             <i class="bi bi-shield-check"></i> Security
                         </div>
                         <div class="card-body">
-                            <p class="mb-2">You are securely logged in via ORCID OAuth.</p>
+                            <p class="mb-2">You are securely logged in via GitHub OAuth.</p>
                             <p class="mb-0 text-muted small">
                                 <i class="bi bi-lock"></i> This section requires authentication.
                             </p>
