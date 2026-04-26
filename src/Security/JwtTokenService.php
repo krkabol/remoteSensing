@@ -1,53 +1,46 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Security;
 
 use App\Entity\User;
+use App\Repository\UserRepository;
 use Lcobucci\JWT\Builder;
-use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\JwtFacade;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
-use Lcobucci\JWT\Validation\Constraint\IssuedBy;
-use Lcobucci\JWT\Validation\Constraint\PermittedFor;
+use Lcobucci\JWT\Validation\Constraint;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
-use Lcobucci\JWT\Validation\Constraint\ValidAt;
-use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
+use Symfony\Component\Clock\ClockInterface;
 
 class JwtTokenService
 {
-    //TODO https://lcobucci-jwt.readthedocs.io/en/latest/quick-start/
-    private Configuration $config;
-    private string $secret;
-    private int $tokenLifetime;
+    private InMemory $key;
+    protected JwtFacade $jwtFacade;
 
-    public function __construct()
+    public function __construct(protected UserRepository $userRepository, private ClockInterface $clock, private readonly string $secret, private int $tokenLifetime)
     {
-        $this->secret = $_ENV['JWT_SECRET_KEY'] ?? bin2hex(random_bytes(32));
-        $this->tokenLifetime = (int) ($_ENV['JWT_TOKEN_LIFETIME'] ?? 3600); // 1-hour default
-
-        $signingKey = InMemory::plainText($this->secret);
-
-        $this->config = Configuration::forSymmetricSigner(
-            new Sha256(),
-            $signingKey
+        $this->jwtFacade = new JwtFacade();
+        $this->key = InMemory::plainText(
+            $this->secret ?? bin2hex(random_bytes(32))
         );
     }
 
     public function createToken(User $user): string
     {
-        $now = new \DateTimeImmutable();
-
-        $token = $this->config->builder()
-            ->issuedBy('remote-sensing-app')
-            ->permittedFor('remote-sensing-api')
-            ->identifiedBy(bin2hex(random_bytes(16)))
-            ->issuedAt($now)
-            ->canOnlyBeUsedAfter($now)
-            ->expiresAt($now->modify("+{$this->tokenLifetime} seconds"))
-            ->withClaim('user_id', $user->getId())
-            ->withClaim('github_id', $user->getGithubId())
-            ->withClaim('email', $user->getEmail())
-            ->getToken($this->config->signer(), $this->config->signingKey());
+        $token = $this->jwtFacade->issue(
+            new Sha256(),
+            $this->key,
+            function (Builder $builder, \DateTimeImmutable $issuedAt) use ($user): Builder {
+                return $builder
+                    ->issuedBy('remote-sensing-app')
+                    ->permittedFor('remote-sensing-api')
+                    ->identifiedBy(bin2hex(random_bytes(16)))
+                    ->expiresAt($issuedAt->modify("+{$this->tokenLifetime} seconds"))
+                    ->withClaim('user_id', $user->getId())
+                    ->withClaim('github_id', $user->getGithubId())
+                    ->withClaim('email', $user->getEmail());
+            }
+        );
 
         return $token->toString();
     }
@@ -55,28 +48,17 @@ class JwtTokenService
     public function parseToken(string $jwt): ?User
     {
         try {
-            $token = $this->config->parser()->parse($jwt);
-
-            // Validate the token
-            $this->config->validator()->assert(
-                $token,
-                new IssuedBy('remote-sensing-app'),
-                new PermittedFor('remote-sensing-api'),
-                new SignedWith($this->config->signer(), InMemory::plainText($this->secret)),
-                new ValidAt(new \DateTimeImmutable()),
+            $token = $this->jwtFacade->parse(
+                $jwt,
+                new SignedWith(new Sha256(), $this->key),
+                new Constraint\StrictValidAt(
+                    $this->clock
+                ),
+                new Constraint\IssuedBy('remote-sensing-app'),
+                new Constraint\PermittedFor('remote-sensing-api'),
             );
 
-            // Create a minimal user object from token claims
-            $user = new User();
-            $user->setGithubId($token->claims()->get('github_id'));
-
-            // Use reflection to set the ID (since there's no setter)
-            $reflection = new \ReflectionClass($user);
-            $idProperty = $reflection->getProperty('id');
-            $idProperty->setAccessible(true);
-            $idProperty->setValue($user, $token->claims()->get('user_id'));
-
-            return $user;
+            return $this->userRepository->findByGithubId($token->claims()->get('github_id'));
         } catch (\Exception $e) {
             return null;
         }

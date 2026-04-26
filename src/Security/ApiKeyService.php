@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Security;
 
@@ -24,7 +24,7 @@ class ApiKeyService
     {
         // Generate a random key
         $rawKey = self::KEY_PREFIX . bin2hex(random_bytes(self::KEY_LENGTH));
-        
+
         // Hash the key for storage
         $hashedKey = hash('sha256', $rawKey);
 
@@ -49,7 +49,7 @@ class ApiKeyService
     public function validateKey(string $rawKey): ?User
     {
         $hashedKey = hash('sha256', $rawKey);
-        
+
         $apiKey = $this->apiKeyRepository->findActiveByKeyHash($hashedKey);
 
         if ($apiKey === null) {

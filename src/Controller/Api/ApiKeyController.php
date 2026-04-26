@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Controller\Api;
 
@@ -183,7 +183,7 @@ class ApiKeyController extends AbstractController
     public function revokeKey(int $id): JsonResponse
     {
         $user = $this->getUser();
-        
+
         // Verify the key belongs to the user
         foreach ($user->getApiKeys() as $key) {
             if ($key->getId() === $id) {

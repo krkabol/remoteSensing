@@ -19,5 +19,9 @@ services:
     App\:
         resource: '../src/'
 
+    App\Security\JwtTokenService:
+        arguments:
+            $tokenLifetime: '%env(int:JWT_TOKEN_LIFETIME)%'
+            $secret: '%env(JWT_SECRET_KEY)%'
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

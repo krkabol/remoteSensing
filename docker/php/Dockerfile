@@ -30,6 +30,11 @@ RUN docker-php-ext-install \
     gd \
     bcmath
 
+# necessary for Symfony dev
+RUN curl -sS https://getcomposer.org/installer | php -- --inst && mv composer.phar /usr/local/bin/composer
+RUN curl -sS https://get.symfony.com/cli/installer | bash
+RUN mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
+
 # Set working directory
 WORKDIR /var/www/html
 

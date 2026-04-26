@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Security;
 
@@ -78,7 +78,7 @@ class GithubAuthenticator extends AbstractAuthenticator
             if (!$user) {
                 $user = new User();
                 $user->setGithubId($githubId);
-                
+
                 // Extract name information
                 $user->setName($githubData['name'] ?? null);
                 $user->setGivenNames($githubData['name'] ?? null);

@@ -1,0 +1,6 @@
+framework:
+    rate_limiter:
+        api_failed_auth:
+            policy: 'sliding_window'
+            limit: 10
+            interval: '1 minute'

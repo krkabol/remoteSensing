@@ -1,10 +1,12 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Security;
 
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
@@ -16,8 +18,11 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 class JwtAuthenticator extends AbstractAuthenticator
 {
     public function __construct(
-        private readonly JwtTokenService $jwtTokenService
-    ) {}
+        private readonly JwtTokenService                                 $jwtTokenService,
+        #[Target('api_failed_auth')] private RateLimiterFactoryInterface $failedLimiter
+    )
+    {
+    }
 
     public function supports(Request $request): ?bool
     {
@@ -30,6 +35,7 @@ class JwtAuthenticator extends AbstractAuthenticator
 
     public function authenticate(Request $request): Passport
     {
+
         $authorizationHeader = $request->headers->get('Authorization');
         $jwt = trim(str_replace('Bearer', '', $authorizationHeader));
 
@@ -40,12 +46,23 @@ class JwtAuthenticator extends AbstractAuthenticator
         $user = $this->jwtTokenService->parseToken($jwt);
 
         if ($user === null) {
+            $this->consumeFailedAttempt($request);
             throw new CustomUserMessageAuthenticationException('Invalid or expired JWT token');
         }
 
         return new SelfValidatingPassport(
             new UserBadge($user->getGithubId(), fn() => $user)
         );
+    }
+
+    private function consumeFailedAttempt(Request $request): void
+    {
+        $ip = $request->getClientIp() ?? 'unknown';
+        $limit = $this->failedLimiter->create($ip)->consume();
+
+        if (!$limit->isAccepted()) {
+            throw new CustomUserMessageAuthenticationException('Too many failed attempts');
+        }
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
