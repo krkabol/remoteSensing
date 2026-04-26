@@ -15,6 +15,7 @@ use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 
 class JwtTokenService
 {
+    //TODO https://lcobucci-jwt.readthedocs.io/en/latest/quick-start/
     private Configuration $config;
     private string $secret;
     private int $tokenLifetime;
@@ -22,7 +23,7 @@ class JwtTokenService
     public function __construct()
     {
         $this->secret = $_ENV['JWT_SECRET_KEY'] ?? bin2hex(random_bytes(32));
-        $this->tokenLifetime = (int) ($_ENV['JWT_TOKEN_LIFETIME'] ?? 3600); // 1 hour default
+        $this->tokenLifetime = (int) ($_ENV['JWT_TOKEN_LIFETIME'] ?? 3600); // 1-hour default
 
         $signingKey = InMemory::plainText($this->secret);
 
@@ -68,7 +69,7 @@ class JwtTokenService
             // Create a minimal user object from token claims
             $user = new User();
             $user->setGithubId($token->claims()->get('github_id'));
-            
+
             // Use reflection to set the ID (since there's no setter)
             $reflection = new \ReflectionClass($user);
             $idProperty = $reflection->getProperty('id');

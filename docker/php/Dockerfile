@@ -30,16 +30,11 @@ RUN docker-php-ext-install \
     gd \
     bcmath
 
-# Get latest Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
 # Set working directory
 WORKDIR /var/www/html
 
 # Create system user for running commands
-RUN useradd -G www-data,root -u 1000 -d /home/symfony symfony
-RUN mkdir -p /home/symfony/.composer && \
-    chown -R symfony:symfony /home/symfony
+RUN useradd -G www-data,www-data -u 1000 -d /home/symfony symfony
 
 EXPOSE 9000
 CMD ["php-fpm"]

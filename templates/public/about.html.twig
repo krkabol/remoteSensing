@@ -4,26 +4,17 @@
 
 {% block body %}
 <div class="container py-5">
-    {% if app.user %}
-    <div class="alert alert-success d-flex align-items-center" role="alert">
-        <i class="bi bi-person-check-fill me-2 fs-4"></i>
-        <div>
-            <strong>Welcome back, {{ app.user.name ?: app.user.userIdentifier }}!</strong>
-            You are logged in and can access the internal section.
-        </div>
-    </div>
-    {% endif %}
     <div class="row">
         <div class="col-lg-8 mx-auto">
             <h1 class="display-5 fw-bold mb-4">About Remote Sensing</h1>
-            
+
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
                     <h5 class="card-title">Our Mission</h5>
                     <p class="card-text">
-                        We provide a comprehensive platform for remote sensing data analysis, 
-                        enabling researchers and scientists to access, process, and share 
-                        satellite imagery and geospatial data.
+                        We provide a comprehensive platform for remote sensing data storage,
+                        enabling researchers and scientists to access, process, and share
+                        data collected remotely.
                     </p>
                 </div>
             </div>
@@ -32,8 +23,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Features</h5>
                     <ul class="list-unstyled">
-                        <li><i class="bi bi-check-circle text-success"></i> Multi-source satellite data access</li>
-                        <li><i class="bi bi-check-circle text-success"></i> Advanced data processing tools</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Multi-source data storage</li>
                         <li><i class="bi bi-check-circle text-success"></i> Collaborative research environment</li>
                         <li><i class="bi bi-check-circle text-success"></i> GitHub integration for developer authentication</li>
                         <li><i class="bi bi-check-circle text-success"></i> Secure internal workspace</li>
@@ -45,13 +35,10 @@
                 <div class="card-body">
                     <h5 class="card-title">GitHub Integration</h5>
                     <p class="card-text">
-                        We use GitHub for authentication. 
-                        GitHub provides a secure and convenient way to access our platform 
+                        We use GitHub for authentication.
+                        GitHub provides a secure and convenient way to access our platform
                         using your existing developer account.
                     </p>
-                    <a href="https://github.com" target="_blank" class="btn btn-outline-secondary">
-                        <i class="bi bi-box-arrow-up-right"></i> Learn more about GitHub
-                    </a>
                 </div>
             </div>
 

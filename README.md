@@ -298,6 +298,7 @@ docker compose exec php php bin/console <command>
 docker compose exec php php bin/console cache:clear
 
 # Run migrations
+docker compose exec php php bin/console doctrine:migrations:diff
 docker compose exec php php bin/console doctrine:migrations:migrate
 
 # Create new migration

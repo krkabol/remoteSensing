@@ -11,6 +11,7 @@
 ###> doctrine/doctrine-bundle ###
 /migrations/*.php
 !/migrations/.gitkeep
+/pgadmin4
 ###< doctrine/doctrine-bundle ###
 
 ###> phpunit/phpunit ###
